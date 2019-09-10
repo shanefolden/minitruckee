@@ -15,8 +15,8 @@ boolean forward = false;
 boolean backward = false;
 int FR_pin_num = 3;
 int FL_pin_num = 5;
-int RL_pin_num = 10;
-int RR_pin_num = 11; 
+int RL_pin_num = 9;
+int RR_pin_num = 6; 
 void setup() {
   Serial.begin(115200);
 
@@ -124,9 +124,7 @@ void analyzeString(char data[])
     if(input_int <= 50 && input_int >= 0) {
       left = true;
       right = false;  
-      recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left
-      Serial.print(" recent_x: ");
-      Serial.println(recent_x); 
+      recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left 
       recent_x = recent_x +1.0;  //1 is straight, 2 is full left
       recent_x = 1.0/recent_x; // 1 is straight, 1/2 is multiplier for full left
 
@@ -175,6 +173,7 @@ void motor_control(int left_pwm, int right_pwm) {
   
   if(forward){
     //activate front left and front right motors
+    Serial.print("got to forward");
     analogWrite(FL_pin_num, left_pwm);
     analogWrite(FR_pin_num, right_pwm);
   }
