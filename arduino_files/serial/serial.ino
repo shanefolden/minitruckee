@@ -24,6 +24,13 @@ void setup() {
   pinMode(FL_pin_num,OUTPUT);
   pinMode(RL_pin_num,OUTPUT);
   pinMode(RR_pin_num,OUTPUT);
+
+ // analogWrite(RL_pin_num, 100);
+ // analogWrite(RR_pin_num, 100);
+ // analogWrite(FR_pin_num, 100);
+ // analogWrite(FL_pin_num, 100);
+    
+
 }
 
 
@@ -170,16 +177,22 @@ void analyzeString(char data[])
 
 void motor_control(int left_pwm, int right_pwm) {
   //
-  
+
+
+  Serial.print("left_pwm: ");
+  Serial.println(left_pwm);
+  Serial.print("right_pwm: ");
+  Serial.println(right_pwm);
   if(forward){
     //activate front left and front right motors
-    Serial.print("got to forward");
+    Serial.print("going forwards:);
     analogWrite(FL_pin_num, left_pwm);
     analogWrite(FR_pin_num, right_pwm);
   }
   
   else if(backward){
     //activate back left + back right motors
+    Serial.print("going backwards");
     analogWrite(RL_pin_num, left_pwm);
     analogWrite(RR_pin_num, right_pwm);
   }
