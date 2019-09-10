@@ -1,0 +1,32 @@
+import time
+import serial
+import os
+import subprocess
+import xbox
+joy = xbox.Joystick()         #Initialize joystick
+
+if joy.A():                   #Test state of the A button (1=pressed, 0=not pressed)
+    print 'A button pressed'
+#p = subprocess.call(["sudo xboxdrv --detach-kernel-driver"], stdout=subprocess.PIPE)
+ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1)
+time.sleep(5)
+def write(ser, str):
+    ser.write(str)
+
+
+def controller_test():
+        #print('Button {0} was pressed'.format(button.name))
+        #foo = controller[0:10]xbo
+        #print(" ",foo)
+        write(ser, "test")
+
+def serial_test():
+    write(ser, "b52>")
+    print("data sent")
+    time.sleep(10)
+    
+
+
+#while(True):
+    # controller_test()
+    #serial_test()
