@@ -9,7 +9,8 @@ boolean newData = false;
 boolean x_direction = false; //boolean for input change in x/y dir or button pressed
 boolean y_direction = false;
 boolean button_pressed = false;
-boolean left = false;
+int global_x_direction = 50;
+boolean left = true;
 boolean right = false;
 boolean forward = false;
 boolean backward = false;
@@ -17,6 +18,8 @@ int FR_pin_num = 3;
 int FL_pin_num = 5;
 int RL_pin_num = 9;
 int RR_pin_num = 6; 
+float recent_x = 1;
+float recent_y = 1;
 void setup() {
   Serial.begin(115200);
 
@@ -24,13 +27,7 @@ void setup() {
   pinMode(FL_pin_num,OUTPUT);
   pinMode(RL_pin_num,OUTPUT);
   pinMode(RR_pin_num,OUTPUT);
-
- analogWrite(RL_pin_num, 100);
- analogWrite(RR_pin_num, 100);
- analogWrite(FR_pin_num, 100);
- analogWrite(FL_pin_num, 100);
     
-
 }
 
 
@@ -68,6 +65,7 @@ void loop()
     analyzeString(receivedChars);   
     newData=false;
   }
+ 
 }
 
 void analyzeString(char data[])
@@ -104,10 +102,14 @@ void analyzeString(char data[])
   temp_string++;
   int input_int;
   sscanf(temp_string, "%d", &input_int);
-  float recent_x;
-  float recent_y;
   // if joystick moved in y direction, determines direction + maps input_id to num between 0 and 255 for PWM
   if(y_direction){
+    if(global_x_direction<=50){
+      left = true;
+    }
+    else{
+      right = true;
+    }
     if(input_int < 50 && input_int >= 0){
       backward = true;
       forward = false;
@@ -128,13 +130,14 @@ void analyzeString(char data[])
   }
   // if joystick moved in y direction, determines direction + maps input_id to num between 1/2 and 1 for steering multiplier
   if(x_direction){
+    global_x_direction=input_int;
     if(input_int <= 50 && input_int >= 0) {
       left = true;
       right = false;  
       recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left 
       recent_x = recent_x +1.0;  //1 is straight, 2 is full left
       recent_x = 1.0/recent_x; // 1 is straight, 1/2 is multiplier for full left
-
+      
     }   
     else if(input_int > 50 && input_int <= 100){
       right = true;
@@ -152,15 +155,18 @@ void analyzeString(char data[])
   int L_pwm_value;
   int R_pwm_value;
 
+
   if(left){
+  
     L_pwm_value = round(recent_y*recent_x);
     R_pwm_value = round(recent_y);
+    
   }
   else if(right){
     L_pwm_value = round(recent_y);
     R_pwm_value = round(recent_y*recent_x);
   }
-  
+ 
   
   //Only call motor control if x or y input changes
   if(left || right || forward || backward) {
@@ -179,20 +185,17 @@ void motor_control(int left_pwm, int right_pwm) {
   //
 
 
-  Serial.print("left_pwm: ");
-  Serial.println(left_pwm);
-  Serial.print("right_pwm: ");
-  Serial.println(right_pwm);
+  
   if(forward){
     //activate front left and front right motors
-    Serial.print("going forwards:");
+    
     analogWrite(FL_pin_num, left_pwm);
     analogWrite(FR_pin_num, right_pwm);
   }
   
   else if(backward){
     //activate back left + back right motors
-    Serial.print("going backwards");
+ 
     analogWrite(RL_pin_num, left_pwm);
     analogWrite(RR_pin_num, right_pwm);
   }
