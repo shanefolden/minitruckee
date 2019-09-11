@@ -32,17 +32,7 @@ def controller_test(old_x_string, old_y_string, old_button_string):
     y_string = "y" + str(y_int)+">"
     
 
-    #set button input
-    if joy.A() == True: 
-        button_string = "b1>"
-    elif joy.B() == True: 
-        button_string = "b2>"
-    elif joy.X() == True: 
-        quit()
-        button_string = "b3>"
-        
-    elif joy.Y() == True: 
-        button_string = "b4>"
+    
 
 
     #compare current input to last input

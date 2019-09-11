@@ -10,7 +10,8 @@ boolean x_direction = false; //boolean for input change in x/y dir or button pre
 boolean y_direction = false;
 boolean button_pressed = false;
 int global_x_direction = 50;
-boolean left = true;
+boolean left = false;
+boolean straight = true;
 boolean right = false;
 boolean forward = false;
 boolean backward = false;
@@ -136,13 +137,21 @@ void analyzeString(char data[])
   // if joystick moved in y direction, determines direction + maps input_id to num between 1/2 and 1 for steering multiplier
   if(x_direction){
     global_x_direction=input_int;
-    if(input_int <= 50 && input_int >= 0) {
+    
+    if(input_int >= 40 && input_int <=60){
+    straight = true;
+    left = false;
+    right = false;
+    recent_x = 1;
+    }
+    
+    if(input_int < 40 && input_int >= 0) {
       left = true;
       right = false;  
       recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left 
       recent_x = recent_x +1.0;  //1 is straight, 2 is full left
-      recent_x = recent_x * 5; // 1 is straight, 4 is full left
-      recent_x = 1.0/recent_x; // 1 is straight, 1/10 is multiplier for full left
+      recent_x = recent_x * 3; // 1 is straight, 6 is full left
+      recent_x = 1.0/recent_x; // 1 is straight, 1/6 is multiplier for full left
       
     }   
     else if(input_int > 50 && input_int <= 100){
@@ -150,8 +159,8 @@ void analyzeString(char data[])
       left = false;
       recent_x = (float(input_int)-50.0)/50.0; //maps 50= straight, 100 = full right; now 0 = straight, 1 = full right
       recent_x = 1 + recent_x;
-      recent_x = recent_x * 5;  
-      recent_x = 1.0/(recent_x); // 1 is straight, 1/10 is multiplier for full right
+      recent_x = recent_x * 6;  
+      recent_x = 1.0/(recent_x); // 1 is straight, 1/6 is multiplier for full right
 
     } 
   }
@@ -169,6 +178,10 @@ void analyzeString(char data[])
     L_pwm_value = round(recent_y*recent_x);
     R_pwm_value = round(recent_y);
     
+  }
+  else if(straight){
+  R_pwm_value = round(recent_y);
+  L_pwm_value = round(recent_y);
   }
   else if(left){
     L_pwm_value = round(recent_y);
