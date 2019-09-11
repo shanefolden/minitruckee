@@ -14,13 +14,15 @@ boolean left = true;
 boolean right = false;
 boolean forward = false;
 boolean backward = false;
-int FR_pin_num = 3;
-int FL_pin_num = 5;
-int RL_pin_num = 9;
-int RR_pin_num = 6; 
-float recent_x = 1;
-float recent_y = 1;
+boolean first_input = false;
+int FR_pin_num = 6;
+int FL_pin_num = 9;
+int RL_pin_num = 5;
+int RR_pin_num = 3; 
+float recent_x;
+float recent_y;
 void setup() {
+ 
   Serial.begin(115200);
 
   pinMode(FR_pin_num,OUTPUT);
@@ -29,7 +31,6 @@ void setup() {
   pinMode(RR_pin_num,OUTPUT);
     
 }
-
 
 void loop()
 {
@@ -41,6 +42,10 @@ void loop()
   char rc;
 
   while (Serial.available() > 0 && newData == false) {
+  if(!first_input) {
+     //delay(3000);
+     first_input = true;
+  }
     //reads serial input, adds to receivedChars
     rc = Serial.read();
     if (rc != endMarker) {
@@ -136,14 +141,17 @@ void analyzeString(char data[])
       right = false;  
       recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left 
       recent_x = recent_x +1.0;  //1 is straight, 2 is full left
-      recent_x = 1.0/recent_x; // 1 is straight, 1/2 is multiplier for full left
+      recent_x = recent_x * 5; // 1 is straight, 4 is full left
+      recent_x = 1.0/recent_x; // 1 is straight, 1/10 is multiplier for full left
       
     }   
     else if(input_int > 50 && input_int <= 100){
       right = true;
       left = false;
       recent_x = (float(input_int)-50.0)/50.0; //maps 50= straight, 100 = full right; now 0 = straight, 1 = full right
-      recent_x = 1.0/(1.0 + recent_x); // 1 is straight, 1/2 is multiplier for full right
+      recent_x = 1 + recent_x;
+      recent_x = recent_x * 5;  
+      recent_x = 1.0/(recent_x); // 1 is straight, 1/10 is multiplier for full right
 
     } 
   }
@@ -156,13 +164,13 @@ void analyzeString(char data[])
   int R_pwm_value;
 
 
-  if(left){
+  if(right){
   
     L_pwm_value = round(recent_y*recent_x);
     R_pwm_value = round(recent_y);
     
   }
-  else if(right){
+  else if(left){
     L_pwm_value = round(recent_y);
     R_pwm_value = round(recent_y*recent_x);
   }
@@ -191,11 +199,16 @@ void motor_control(int left_pwm, int right_pwm) {
     
     analogWrite(FL_pin_num, left_pwm);
     analogWrite(FR_pin_num, right_pwm);
-  }
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
+
+}
   
   else if(backward){
     //activate back left + back right motors
- 
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num,0);
+
     analogWrite(RL_pin_num, left_pwm);
     analogWrite(RR_pin_num, right_pwm);
   }
@@ -217,6 +230,12 @@ void button_control(int buttonID){
   if(buttonID == 2){
     //B button pressed
     //do things
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
+    delay(3000);
+
   } 
   if(buttonID == 3){
     //X button pressed
