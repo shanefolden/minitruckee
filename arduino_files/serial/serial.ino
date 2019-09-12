@@ -6,16 +6,10 @@ const byte numChars = 140;
 //char receivedChars[numChars];   // an array to store the received data
 char receivedChar;
 boolean newData = false;
-boolean x_direction = false; //boolean for input change in x/y dir or button pressed
-boolean y_direction = false;
+
 boolean change_in_dir = false;
 boolean button_pressed = false;
-int global_x_direction = 50;
-boolean left = false;
-boolean straight = true;
-boolean right = false;
-boolean forward = false;
-boolean backward = false;
+
 boolean first_input = false;
 int FR_pin_num = 6;
 int FL_pin_num = 9;
@@ -92,7 +86,6 @@ void analyzeString(char data[])
 
   //determine first letter and set correct bool
 
-  
   if(data[0]=='d') {
     change_in_dir = true;
   }
@@ -109,132 +102,67 @@ void analyzeString(char data[])
   sscanf(temp_string, "%d", &input_int);
   
   if(change_in_dir) {
-      motorControl(input_int);
+      motor_control(input_int);
   }
-
-if(y_direction){
-    if(global_x_direction<=50){
-      left = true;
-    }
-    else{
-      right = true;
-    }
-    if(input_int < 50 && input_int >= 0){
-      backward = true;
-      forward = false;
-      recent_y = ((float(input_int)-50.0)* (-1.0/50.0)); //0 is no backward thrust, 1 is full thrust
-      recent_y = recent_y*255;//0 is no backward thrust, 255 is full thrust; this is the PWM value
-
-    }
-
-    else if(input_int >= 50 && input_int <= 100){
-      backward = false;
-      forward = true;
-
-      recent_y=(float(input_int)-50.0)/50.0; //0 is no foward thrust, 1 is full forward thrust
-
-      recent_y = recent_y*255; // o is no foward thrust, 255 is full thrust, this is the PWM value
-
-    }
-  }
-  // if joystick moved in y direction, determines direction + maps input_id to num between 1/2 and 1 for steering multiplier
-  if(x_direction){
-    global_x_direction=input_int;
-    
-    if(input_int >= 40 && input_int <=60){
-    straight = true;
-    left = false;
-    right = false;
-    recent_x = 1;
-    }
-    
-    if(input_int < 40 && input_int >= 0) {
-      left = true;
-      right = false;  
-      recent_x = (float(input_int)*-1.0+50.0)/50.0;  // 50 = straight, 0 = full left, maps this to 0 is straight, 1 is full left 
-      recent_x = recent_x +1.0;  //1 is straight, 2 is full left
-      recent_x = recent_x * 3; // 1 is straight, 6 is full left
-      recent_x = 1.0/recent_x; // 1 is straight, 1/6 is multiplier for full left
-      
-    }   
-    else if(input_int > 50 && input_int <= 100){
-      right = true;
-      left = false;
-      recent_x = (float(input_int)-50.0)/50.0; //maps 50= straight, 100 = full right; now 0 = straight, 1 = full right
-      recent_x = 1 + recent_x;
-      recent_x = recent_x * 6;  
-      recent_x = 1.0/(recent_x); // 1 is straight, 1/6 is multiplier for full right
-
-    } 
-  }
-  // dont need these bools set true anymore, now more specific dir bool is true (left, right etc)
-  x_direction = false;
-  y_direction = false;
-  
-  //values passed to motor control fn
-  int L_pwm_value;
-  int R_pwm_value;
-
-
-  if(right){
-  
-    L_pwm_value = round(recent_y*recent_x);
-    R_pwm_value = round(recent_y);
-    
-  }
-  else if(straight){
-  R_pwm_value = round(recent_y);
-  L_pwm_value = round(recent_y);
-  }
-  else if(left){
-    L_pwm_value = round(recent_y);
-    R_pwm_value = round(recent_y*recent_x);
-  }
- 
-  
-  //Only call motor control if x or y input changes
-  if(left || right || forward || backward) {
-    motor_control(L_pwm_value,R_pwm_value);
-  }
-
   else if(button_pressed)
   {
     button_control(input_int);
-  }  
-
-
+  }
+  change_in_dir = false;  
 }
 
-void motor_control(int left_pwm, int right_pwm) {
-  //
-
-
+void motor_control(int dir_value) {
   
-  if(forward){
+  int left_pwm = 0;
+  int right_pwm = 0;
+  
+  if(dir_value==0){
     //activate front left and front right motors
-    
-    analogWrite(FL_pin_num, left_pwm);
-    analogWrite(FR_pin_num, right_pwm);
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
     analogWrite(RL_pin_num, 0);
     analogWrite(RR_pin_num, 0);
-
 }
-  
-  else if(backward){
-    //activate back left + back right motors
-    analogWrite(FL_pin_num, 0);
-    analogWrite(FR_pin_num,0);
-
-    analogWrite(RL_pin_num, left_pwm);
-    analogWrite(RR_pin_num, right_pwm);
+  else if(dir_value==1){
+    analogWrite(FL_pin_num, 50);
+    analogWrite(FR_pin_num, 200);
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
+  }
+   else if(dir_value==2){
+    analogWrite(FL_pin_num, 200);
+    analogWrite(FR_pin_num, 200);
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
+  }
+   else if(dir_value==3){
+    analogWrite(FL_pin_num, 200);
+    analogWrite(FR_pin_num, 50);
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
   }
 
+   else if(dir_value==4){
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
+    analogWrite(RL_pin_num, 50);
+    analogWrite(RR_pin_num, 200);
+  }
 
-  // Once pin code is run, set all dir bools to false so they dont get run until theres a new input
-  left = false;
-  right = false;
-  forward = false;
-  backward = false;
+   else if(dir_value==5){
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
+    analogWrite(RL_pin_num, 200);
+    analogWrite(RR_pin_num, 200);
+  }
+
+   else if(dir_value==6){
+    analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
+    analogWrite(RL_pin_num, 200);
+    analogWrite(RR_pin_num, 50);
+  }
+  
 }
 
 void button_control(int buttonID){ 
@@ -245,7 +173,7 @@ void button_control(int buttonID){
   }
   if(buttonID == 2){
     //B button pressed
-    //do things
+    //Emergency stop - stop all motors and sleep for 3s
     analogWrite(FL_pin_num, 0);
     analogWrite(FR_pin_num, 0);
     analogWrite(RL_pin_num, 0);
@@ -272,25 +200,7 @@ void button_control(int buttonID){
 
 
 
-
-
-
-/* Not sure what these methods do but I'm scared to fully delete them
- void recvOneChar() {
- if (Serial.available() > 0) {
- receivedChar = Serial.read();
- newData = true;
- }
- }
- 
- 
- void showNewData() {
- if (newData == true) {
- Serial.print("test");  
- newData = false;
- }
- }
- 
+/* 
  Test print statements and func calls that might be useful later:
  
  Serial.print("  x = 0:  ");
