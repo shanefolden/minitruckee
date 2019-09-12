@@ -12,25 +12,42 @@ print("were live")
 
 def write(str):
     ser.write(str)
+    print("write")
 
 
-def controller_test(old_x_string, old_y_string, old_button_string):
+def controller_test(old_dir_string, old_button_string):
     # A = 1, B = 2, X = 3, Y = 4
     button_string = ""
-    x_int = 50
-    y_int = 50
-    x_string = ""
-    y_string = ""
-    
+    dir_string = ""
     position = joy.leftStick()
     x = position[0]
     y = position[1]
-    
-    x_int = round(x*(50)+50)
-    x_string = "x"+str(x_int)+">"    
-    y_int = round(y*50+50)
-    y_string = "y" + str(y_int)+">"
-    
+
+    # dir values:
+    # 0 = no movement
+    # 1 = forward left
+    # 2 = forward straight
+    # 3 = f right
+    # 4 = b left
+    # 5 = b str
+    # 6 = b r
+
+    if y == 0:
+        dir_string = "d0>"
+    elif y > 0:
+        if x < 0:
+            dir_string  = "d1>"
+        elif x ==0:
+            dir_string = "d2>"
+        elif x > 0:
+            dir_string = "d3>"
+    elif y < 0:
+        if x < 0:
+            dir_string = "d4>"
+        elif x == 0:
+            dir_string = "d5>"
+        elif x > 0:
+            dir_string = "d6>"
 
     #set button input
     if joy.A() == True: 
@@ -52,23 +69,17 @@ def controller_test(old_x_string, old_y_string, old_button_string):
             write(button_string.encode())
             print("new button string detected. sending "+button_string)
         old_button_string = button_string
-    if x_string != old_x_string:
-        print("new x string detected. sending "+x_string)
-        write(x_string.encode())
-        old_x_string = x_string
-    if y_string != old_y_string:
-        print("new y string detected. sending "+y_string)
-        write(y_string.encode())
-        old_y_string = y_string
-        
+    if dir_string != old_dir_string:
+        print("new dir_string detected. sending "+dir_string)
+        write(dir_string.encode())
+        old_dir_string = dir_string
+          
     # create tuple of old values to return 
-    old_values = (old_x_string, old_y_string, old_button_string)
+    old_values = (old_dir_string, old_button_string)
     return old_values
     
 
 str1 = ""
 str2 = ""
-str3 = ""
 while(True):
-    str1, str2, str3 = controller_test(str1, str2, str3)
-    #
+    str1, str2  = controller_test(str1, str2)

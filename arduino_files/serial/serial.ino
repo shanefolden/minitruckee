@@ -8,6 +8,7 @@ char receivedChar;
 boolean newData = false;
 boolean x_direction = false; //boolean for input change in x/y dir or button pressed
 boolean y_direction = false;
+boolean change_in_dir = false;
 boolean button_pressed = false;
 int global_x_direction = 50;
 boolean left = false;
@@ -22,8 +23,7 @@ int RL_pin_num = 5;
 int RR_pin_num = 3; 
 float recent_x;
 float recent_y;
-void setup() {
- 
+void setup() { 
   Serial.begin(115200);
 
   pinMode(FR_pin_num,OUTPUT);
@@ -74,6 +74,7 @@ void loop()
  
 }
 
+
 void analyzeString(char data[])
 {
   //func that deconstructs string, extracts info, calls motor or button func 
@@ -91,11 +92,9 @@ void analyzeString(char data[])
 
   //determine first letter and set correct bool
 
-  if(data[0]=='y') {
-    y_direction = true;
-  }
-  else if(data[0]=='x') {
-    x_direction = true;
+  
+  if(data[0]=='d') {
+    change_in_dir = true;
   }
 
   else if(data[0]=='b') {
@@ -108,8 +107,12 @@ void analyzeString(char data[])
   temp_string++;
   int input_int;
   sscanf(temp_string, "%d", &input_int);
-  // if joystick moved in y direction, determines direction + maps input_id to num between 0 and 255 for PWM
-  if(y_direction){
+  
+  if(change_in_dir) {
+      motorControl(input_int);
+  }
+
+if(y_direction){
     if(global_x_direction<=50){
       left = true;
     }
