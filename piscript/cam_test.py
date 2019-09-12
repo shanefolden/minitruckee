@@ -20,15 +20,21 @@ PAGE="""\
 </body>
 </html>
 """
+x = 0
 
 class StreamingOutput(object):
+
     def __init__(self):
         self.frame = None
         self.buffer = io.BytesIO()
         self.condition = Condition()
 
     def write(self, buf):
-        #print("yeet")
+        global x
+        x = x + 1
+        #take photo once every 1.5s. This function runs x times every second where x is the framerate 
+        if x % 12 == 0:
+            camera.capture('/Desktop/minitruckee/images/img1.jpg')
         if buf.startswith(b'\xff\xd8'):
             # New frame, copy the existing buffer's content and notify all
             # clients it's available
