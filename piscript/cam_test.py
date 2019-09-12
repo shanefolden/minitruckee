@@ -8,7 +8,7 @@ import logging
 import socketserver
 from threading import Condition
 from http import server
-
+x = 1
 PAGE="""\
 <html>
 <head>
@@ -28,6 +28,7 @@ class StreamingOutput(object):
         self.condition = Condition()
 
     def write(self, buf):
+        #print("yeet")
         if buf.startswith(b'\xff\xd8'):
             # New frame, copy the existing buffer's content and notify all
             # clients it's available

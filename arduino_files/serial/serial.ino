@@ -24,7 +24,12 @@ void setup() {
   pinMode(FL_pin_num,OUTPUT);
   pinMode(RL_pin_num,OUTPUT);
   pinMode(RR_pin_num,OUTPUT);
-    
+
+  analogWrite(FL_pin_num, 0);
+    analogWrite(FR_pin_num, 0);
+    analogWrite(RL_pin_num, 0);
+    analogWrite(RR_pin_num, 0);
+
 }
 
 void loop()
@@ -102,7 +107,7 @@ void analyzeString(char data[])
   sscanf(temp_string, "%d", &input_int);
   
   if(change_in_dir) {
-      motor_control(input_int);
+  //    motor_control(input_int);
   }
   else if(button_pressed)
   {
@@ -125,9 +130,9 @@ void motor_control(int dir_value) {
 }
   else if(dir_value==1){
     analogWrite(FL_pin_num, 255);
-    analogWrite(FR_pin_num, 30);
+    analogWrite(FR_pin_num, 0);
     analogWrite(RL_pin_num, 0);
-    analogWrite(RR_pin_num, 0);
+    analogWrite(RR_pin_num, 100);
   }
    else if(dir_value==2){
     analogWrite(FL_pin_num, 200);
@@ -136,9 +141,9 @@ void motor_control(int dir_value) {
     analogWrite(RR_pin_num, 0);
   }
    else if(dir_value==3){
-    analogWrite(FL_pin_num, 30);
+    analogWrite(FL_pin_num, 0);
     analogWrite(FR_pin_num, 255);
-    analogWrite(RL_pin_num, 0);
+    analogWrite(RL_pin_num, 100);
     analogWrite(RR_pin_num, 0);
   }
 
