@@ -8,6 +8,8 @@ joy = xbox.Joystick()
 # initialize serial port on arduino
 ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1)
 #time.sleep(2)
+video_script = False;
+cam_script = False;
 print("were live")
 
 def write(str):
@@ -19,6 +21,7 @@ def controller_test(old_dir_string, old_button_string):
     # A = 1, B = 2, X = 3, Y = 4
     button_string = ""
     dir_string = ""
+    global video_script
     position = joy.leftStick()
     x = position[0]
     y = position[1]
@@ -50,8 +53,18 @@ def controller_test(old_dir_string, old_button_string):
             dir_string = "d6>"
 
     #set button input
-    if joy.A() == True: 
-        button_string = "b1>"
+    if joy.A() == True:
+        if not video_script:
+            print("starting video script")
+            #proc1 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/Desktop/minitruckee/piscript/cam_test.py'])
+            time.sleep(.5)
+            video_script = True
+            print("slept half a second")
+        elif video_script:
+            #proc1.kill()
+            print("yes")
+            
+        #button_string = "b1>"
     elif joy.B() == True: 
         button_string = "b2>"
     elif joy.X() == True: 

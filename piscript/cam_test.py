@@ -5,9 +5,11 @@
 import io
 import picamera
 import logging
+import time
 import socketserver
 from threading import Condition
 from http import server
+from datetime import datetime 
 x = 1
 PAGE="""\
 <html>
@@ -33,8 +35,12 @@ class StreamingOutput(object):
         global x
         x = x + 1
         #take photo once every 1.5s. This function runs x times every second where x is the framerate 
-        if x % 12 == 0:
-            camera.capture('/Desktop/minitruckee/images/img1.jpg')
+        if x % 8 == 0:
+            print("running")
+            #timestr = time.strftime("%m-%d--%H:%M:%S")
+            #file_str = "/home/pi/Desktop/minitruckee/images/"+timestr+".jpg"
+            #print(file_str)
+            #camera.capture(file_str)
         if buf.startswith(b'\xff\xd8'):
             # New frame, copy the existing buffer's content and notify all
             # clients it's available
@@ -91,7 +97,7 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 with picamera.PiCamera(resolution='640x480', framerate=8) as camera:
     output = StreamingOutput()
     #Uncomment the next line to change your Pi's Camera rotation (in degrees)
-    #camera.rotation = 180
+    camera.rotation = 180
     camera.start_recording(output, format='mjpeg')
     try:
         address = ('', 5005)
