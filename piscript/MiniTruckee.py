@@ -1,14 +1,18 @@
 import time
+import signal
 import serial
 import os
 import subprocess
 import xbox
+proc1 = None
+proc2 = None
 #initialize joystick
 joy = xbox.Joystick()
 # initialize serial port on arduino
 ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1)
 #time.sleep(2)
 video_script = False;
+photo_script = False;
 cam_script = False;
 print("were live")
 
@@ -16,16 +20,36 @@ def write(str):
     ser.write(str)
     print("write")
 
+def vid_open(open_close_bool):
+    global proc1
+    if open_close_bool and not video_script:
+        proc1 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/test.py'], preexec_fn=os.setsid)
+        time.sleep(.8)
+    if not open_close_bool and video_script:
+        os.killpg(os.getpgid(proc1.pid), signal.SIGTERM)
+        time.sleep(.8)
 
+def photo_open(open_close_bool):
+    global proc2
+    if open_close_bool:
+        proc2 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/test2.py'], preexec_fn=os.setsid)
+        time.sleep(.8)
+    if not open_close_bool:
+        os.killpg(os.getpgid(proc2.pid), signal.SIGTERM)
+        time.sleep(.8)
+
+
+
+ 
 def controller_test(old_dir_string, old_button_string):
     # A = 1, B = 2, X = 3, Y = 4
     button_string = ""
     dir_string = ""
     global video_script
+    global photo_script
     position = joy.leftStick()
     x = position[0]
     y = position[1]
-
     # dir values:
     # 0 = no movement
     # 1 = forward left
@@ -54,27 +78,27 @@ def controller_test(old_dir_string, old_button_string):
 
     #set button input
     if joy.A() == True:
-        if not video_script:
+        if not video_script and not photo_script:
             print("starting video script")
-            #proc1 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/Desktop/minitruckee/piscript/cam_test.py'])
-            time.sleep(.5)
+            vid_open(True)
             video_script = True
-            print("slept half a second")
         elif video_script:
-            #proc1.kill()
-            print("yes")
-            
+            vid_open(False)
+            video_script = False
         #button_string = "b1>"
     elif joy.B() == True: 
         button_string = "b2>"
     elif joy.X() == True: 
-        quit()
-        button_string = "b3>"
-        
+        quit()    
     elif joy.Y() == True: 
-        button_string = "b4>"
-
-
+        if not photo_script and not video_script:
+            print("starting camera script")
+            photo_open(True)
+            photo_script = True
+        elif photo_script:
+            photo_open(False)
+            photo_script = False
+        
     #compare current input to last input
     #only send if input is different and not null
     if button_string != old_button_string:

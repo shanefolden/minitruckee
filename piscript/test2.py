@@ -1,5 +1,5 @@
 import time
-for i in range(30):
-    print(i)
+for x in range(50):
+    print("a")
     time.sleep(1)
 exit()
