@@ -23,7 +23,7 @@ def write(str):
 def vid_open(open_close_bool):
     global proc1
     if open_close_bool and not video_script:
-        proc1 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/test.py'], preexec_fn=os.setsid)
+        proc1 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/cam_test.py'], preexec_fn=os.setsid)
         time.sleep(.8)
     if not open_close_bool and video_script:
         os.killpg(os.getpgid(proc1.pid), signal.SIGTERM)
@@ -32,7 +32,7 @@ def vid_open(open_close_bool):
 def photo_open(open_close_bool):
     global proc2
     if open_close_bool:
-        proc2 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/test2.py'], preexec_fn=os.setsid)
+        proc2 = subprocess.Popen(['sudo', 'python3.7', '/home/pi/minitruckee/piscript/take_photos.py'], preexec_fn=os.setsid)
         time.sleep(.8)
     if not open_close_bool:
         os.killpg(os.getpgid(proc2.pid), signal.SIGTERM)
@@ -88,7 +88,11 @@ def controller_test(old_dir_string, old_button_string):
         #button_string = "b1>"
     elif joy.B() == True: 
         button_string = "b2>"
-    elif joy.X() == True: 
+    elif joy.X() == True:
+        if photo_script:
+            photo_open(False)
+        if video_script:
+            vid_open(False)
         quit()    
     elif joy.Y() == True: 
         if not photo_script and not video_script:
