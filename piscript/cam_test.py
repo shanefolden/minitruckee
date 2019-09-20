@@ -11,6 +11,8 @@ from threading import Condition
 from http import server
 from datetime import datetime 
 x = 1
+
+# basic html to set up page
 PAGE="""\
 <html>
 <head>
@@ -32,15 +34,6 @@ class StreamingOutput(object):
         self.condition = Condition()
 
     def write(self, buf):
-        global x
-        x = x + 1
-        #take photo once every 1.5s. This function runs x times every second where x is the framerate 
-        if x % 8 == 0:
-            print("running")
-            #timestr = time.strftime("%m-%d--%H:%M:%S")
-            #file_str = "/home/pi/Desktop/minitruckee/images/"+timestr+".jpg"
-            #print(file_str)
-            #camera.capture(file_str)
         if buf.startswith(b'\xff\xd8'):
             # New frame, copy the existing buffer's content and notify all
             # clients it's available
